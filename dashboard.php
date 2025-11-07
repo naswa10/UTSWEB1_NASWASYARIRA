@@ -7,12 +7,32 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// =============================
-// DATA PRODUK (Commit 5)
-// =============================
 $kode_barang = ["B001", "B002", "B003", "B004", "B005"];
 $nama_barang = ["Mie Lidi Pedas", "Keripik Balado", "Es Kopi Susu", "Jus Mangga", "Roti Coklat"];
 $harga_barang = [7000, 8000, 12000, 10000, 6000];
+
+$index_terpilih = array_keys($kode_barang);
+shuffle($index_terpilih); 
+
+$barang_beli = [];
+$jumlah = [];
+$total = [];
+$total_belanja = 0;
+
+foreach ($index_terpilih as $idx) {
+    $jumlah = rand(1, 5); 
+    $total = $harga_barang[$idx] * $jumlah;
+
+    $barang_beli[] = [
+        'kode' => $kode_barang[$idx],
+        'nama' => $nama_barang[$idx],
+        'harga' => $harga_barang[$idx],
+        'jumlah' => $jumlah,
+        'total' => $total
+    ];
+
+    $total_belanja += $total;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -135,16 +155,24 @@ $harga_barang = [7000, 8000, 12000, 10000, 6000];
                 <th>Kode Barang</th>
                 <th>Nama Barang</th>
                 <th>Harga</th>
+                <th>Jumlah</th>
+                <th>Total</th>
             </tr>
-            <?php
-            for ($i = 0; $i < count($kode_barang); $i++) {
-                echo "<tr>
-                        <td>{$kode_barang[$i]}</td>
-                        <td>{$nama_barang[$i]}</td>
-                        <td>Rp " . number_format($harga_barang[$i], 0, ',', '.') . "</td>
-                      </tr>";
-            }
-            ?>
+            <?php foreach ($barang_beli as $b): ?>
+                <tr>
+                    <td><?= $b['kode']; ?></td>
+                    <td><?= $b['nama']; ?></td>
+                    <td>Rp <?= number_format($b['harga'], 0, ',', '.'); ?></td>
+                    <td><?= $b['jumlah']; ?></td>
+                    <td>Rp <?= number_format($b['total'], 0, ',', '.'); ?></td>
+                 </tr>
+            <?php endforeach; ?>
+            <tfoot>
+                <tr> 
+                    <td colspan="4" align="right">Total Belanja</td>
+                <td>Rp <?= number_format($total_belanja, 0, ',', '.'); ?></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </body>
