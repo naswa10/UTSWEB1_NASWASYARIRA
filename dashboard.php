@@ -15,13 +15,12 @@ $index_terpilih = array_keys($kode_barang);
 shuffle($index_terpilih); 
 
 $barang_beli = [];
-$jumlah = [];
-$total = [];
-$total_belanja = 0;
+$grandtotal = 0;
 
 foreach ($index_terpilih as $idx) {
     $jumlah = rand(1, 5); 
     $total = $harga_barang[$idx] * $jumlah;
+    $grandtotal += $total;
 
     $barang_beli[] = [
         'kode' => $kode_barang[$idx],
@@ -31,9 +30,9 @@ foreach ($index_terpilih as $idx) {
         'total' => $total
     ];
 
-    $total_belanja += $total;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -170,7 +169,7 @@ foreach ($index_terpilih as $idx) {
             <tfoot>
                 <tr> 
                     <td colspan="4" align="right">Total Belanja</td>
-                <td>Rp <?= number_format($total_belanja, 0, ',', '.'); ?></td>
+                    <td>Rp <?= number_format($grandtotal, 0, ',', '.'); ?></td>
                 </tr>
             </tfoot>
         </table>
