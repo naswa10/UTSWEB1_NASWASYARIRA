@@ -16,6 +16,7 @@ shuffle($index_terpilih);
 
 $barang_beli = [];
 $grandtotal = 0;
+$tanggal = date('d F Y');
 
 foreach ($index_terpilih as $idx) {
     $jumlah = rand(1, 5); 
@@ -112,12 +113,27 @@ foreach ($index_terpilih as $idx) {
         }
         th {
             background-color: #f0f4ff;
-            color: #333;
+            font-weight: bold;
+        }
+
+        td {
+            font-weight: normal;
+        }
+
+        tfoot td {
+            font-weight: bold;
         }
 
         h3 {
             text-align: center;
             color: #0066ff;
+            margin-bottom: 10px;
+        }
+
+        .info-transaksi {
+            text-align: center;
+            font-size: 14px;
+            color: #333;
             margin-bottom: 10px;
         }
 
@@ -149,6 +165,10 @@ foreach ($index_terpilih as $idx) {
 
         <!-- Tabel produk -->
         <h3>Daftar Pembelian</h3>
+
+        <div class="info-transaksi">
+            <p>Tanggal Transaksi: <b><?= $tanggal; ?></b?></p>
+        </div>
         <table>
             <tr>
                 <th>Kode Barang</th>
