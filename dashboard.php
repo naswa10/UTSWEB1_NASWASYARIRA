@@ -7,33 +7,40 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-$kode_barang = ["B001", "B002", "B003", "B004", "B005"];
-$nama_barang = ["Mie Lidi Pedas", "Keripik Balado", "Es Kopi Susu", "Jus Mangga", "Roti Coklat"];
-$harga_barang = [7000, 8000, 12000, 10000, 6000];
+// ARRAY MULTI DIMENSI
+$barang = [
+    ["kode" => "B001", "nama" => "Mie Lidi Pedas", "harga" => 7000],
+    ["kode" => "B002", "nama" => "Keripik Balado", "harga" => 8000],
+    ["kode" => "B003", "nama" => "Es Kopi Susu", "harga" => 12000],
+    ["kode" => "B004", "nama" => "Jus Mangga", "harga" => 10000],
+    ["kode" => "B005", "nama" => "Roti Coklat", "harga" => 6000]
+];
 
-$index_terpilih = array_keys($kode_barang);
-shuffle($index_terpilih); 
+// Acak index barang
+$index_terpilih = array_keys($barang);
+shuffle($index_terpilih);
 
 $barang_beli = [];
 $grandtotal = 0;
 $tanggal = date('d F Y');
 
-foreach ($index_terpilih as $idx) {
-    $jumlah = rand(1, 5); 
-    $total = $harga_barang[$idx] * $jumlah;
+// Loop pembelian
+foreach ($index_terpilih as $i) {
+
+    $jumlah = rand(1, 5);
+    $total  = $barang[$i]["harga"] * $jumlah;
+
     $grandtotal += $total;
 
     $barang_beli[] = [
-        'kode' => $kode_barang[$idx],
-        'nama' => $nama_barang[$idx],
-        'harga' => $harga_barang[$idx],
-        'jumlah' => $jumlah,
-        'total' => $total
+        "kode"   => $barang[$i]["kode"],
+        "nama"   => $barang[$i]["nama"],
+        "harga"  => $barang[$i]["harga"],
+        "jumlah" => $jumlah,
+        "total"  => $total
     ];
-
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -55,100 +62,50 @@ foreach ($index_terpilih as $idx) {
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             padding: 30px 40px;
         }
-
-        /* ====== HEADER FLEX ====== */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 25px;
         }
-        .judul {
-            text-align: left;
-            color: #0066ff;
-        }
         .judul h2 {
             margin: 0;
             font-size: 22px;
-            letter-spacing: 1px;
-        }
-        .judul p {
-            margin: 2px 0 0 0;
-            font-size: 14px;
-            color: #555;
-        }
-        .user-info {
-            text-align: right;
+            color: #0066ff;
         }
         .user-info p {
             margin: 0;
             font-size: 14px;
-            color: #333;
         }
         a.logout {
-            display: inline-block;
-            margin-top: 6px;
             background: linear-gradient(90deg, #ff4b2b, #ff416c);
-            color: white;
-            text-decoration: none;
             padding: 6px 16px;
+            color: white;
             border-radius: 20px;
             font-weight: bold;
-            transition: 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 5px;
         }
-        a.logout:hover {
-            transform: scale(1.05);
-        }
-
-        /* ====== TABEL PRODUK ====== */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
         }
         th, td {
-            border: 1px solid #ddd;
             padding: 10px;
+            border: 1px solid #ddd;
             text-align: center;
         }
         th {
             background-color: #f0f4ff;
-            font-weight: bold;
-        }
-
-        td {
-            font-weight: normal;
-        }
-
-        tfoot td {
-            font-weight: bold;
-        }
-
-        h3 {
-            text-align: center;
-            color: #0066ff;
-            margin-bottom: 10px;
-        }
-
-        .info-transaksi {
-            text-align: center;
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 12px;
-            color: #777;
-            margin-top: 30px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
 
-        <!-- Header kiri-kanan -->
         <div class="header">
             <div class="judul">
                 <h2>-- POLGAN MART --</h2>
@@ -163,12 +120,9 @@ foreach ($index_terpilih as $idx) {
 
         <hr>
 
-        <!-- Tabel produk -->
-        <h3>Daftar Pembelian</h3>
+        <h3 style="text-align:center; color:#0066ff;">Daftar Pembelian</h3>
+        <p style="text-align:center;">Tanggal Transaksi: <b><?= $tanggal; ?></b></p>
 
-        <div class="info-transaksi">
-            <p>Tanggal Transaksi: <b><?= $tanggal; ?></b?></p>
-        </div>
         <table>
             <tr>
                 <th>Kode Barang</th>
@@ -177,22 +131,25 @@ foreach ($index_terpilih as $idx) {
                 <th>Jumlah</th>
                 <th>Total</th>
             </tr>
+
             <?php foreach ($barang_beli as $b): ?>
-                <tr>
-                    <td><?= $b['kode']; ?></td>
-                    <td><?= $b['nama']; ?></td>
-                    <td>Rp <?= number_format($b['harga'], 0, ',', '.'); ?></td>
-                    <td><?= $b['jumlah']; ?></td>
-                    <td>Rp <?= number_format($b['total'], 0, ',', '.'); ?></td>
-                 </tr>
+            <tr>
+                <td><?= $b["kode"]; ?></td>
+                <td><?= $b["nama"]; ?></td>
+                <td>Rp <?= number_format($b["harga"], 0, ',', '.'); ?></td>
+                <td><?= $b["jumlah"]; ?></td>
+                <td>Rp <?= number_format($b["total"], 0, ',', '.'); ?></td>
+            </tr>
             <?php endforeach; ?>
+
             <tfoot>
-                <tr> 
-                    <td colspan="4" align="right">Total Belanja</td>
-                    <td>Rp <?= number_format($grandtotal, 0, ',', '.'); ?></td>
+                <tr>
+                    <td colspan="4" align="right"><b>Total Belanja</b></td>
+                    <td><b>Rp <?= number_format($grandtotal, 0, ',', '.'); ?></b></td>
                 </tr>
             </tfoot>
         </table>
+
     </div>
 </body>
 </html>
