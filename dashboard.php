@@ -1,155 +1,184 @@
 <?php
 session_start();
 
-// Cegah akses langsung tanpa login
+// Cegah akses tanpa login (opsional)
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
-    exit;
+    $_SESSION['username'] = "admin"; // contoh
+    $_SESSION['role'] = "Dosen";     // contoh role
 }
 
-// ARRAY MULTI DIMENSI
-$barang = [
-    ["kode" => "B001", "nama" => "Mie Lidi Pedas", "harga" => 7000],
-    ["kode" => "B002", "nama" => "Keripik Balado", "harga" => 8000],
-    ["kode" => "B003", "nama" => "Es Kopi Susu", "harga" => 12000],
-    ["kode" => "B004", "nama" => "Jus Mangga", "harga" => 10000],
-    ["kode" => "B005", "nama" => "Roti Coklat", "harga" => 6000]
-];
+// Keranjang belanja (gunakan session)
+if (!isset($_SESSION['keranjang'])) {
+    $_SESSION['keranjang'] = [];
+}
 
-// Acak index barang
-$index_terpilih = array_keys($barang);
-shuffle($index_terpilih);
+// Tambahkan barang ke keranjang
+if (isset($_POST['tambah'])) {
+    $kode   = $_POST['kode'];
+    $nama   = $_POST['nama'];
+    $harga  = $_POST['harga'];
+    $jumlah = $_POST['jumlah'];
 
-$barang_beli = [];
-$grandtotal = 0;
-$tanggal = date('d F Y');
+    $total = $harga * $jumlah;
 
-// Loop pembelian
-foreach ($index_terpilih as $i) {
-
-    $jumlah = rand(1, 5);
-    $total  = $barang[$i]["harga"] * $jumlah;
-
-    $grandtotal += $total;
-
-    $barang_beli[] = [
-        "kode"   => $barang[$i]["kode"],
-        "nama"   => $barang[$i]["nama"],
-        "harga"  => $barang[$i]["harga"],
+    $_SESSION['keranjang'][] = [
+        "kode"   => $kode,
+        "nama"   => $nama,
+        "harga"  => $harga,
         "jumlah" => $jumlah,
         "total"  => $total
     ];
 }
+
+// Hapus keranjang
+if (isset($_POST['hapus'])) {
+    $_SESSION['keranjang'] = [];
+}
+
+$keranjang = $_SESSION['keranjang'];
+
+// Hitung total
+$totalBelanja = 0;
+foreach ($keranjang as $b) {
+    $totalBelanja += $b["total"];
+}
+
+$diskon = $totalBelanja * 0.05;
+$totalBayar = $totalBelanja - $diskon;
+
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Penjualan - POLGAN MART</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            background: linear-gradient(135deg, #6fa3ef, #87cefa, #d4e7fe);
-            min-height: 100vh;
-            padding: 0;
+            background: #f5f7fb;
         }
-        .container {
-            background: white;
-            max-width: 900px;
-            margin: 60px auto;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            padding: 30px 40px;
+        .card {
+            border-radius: 16px;
         }
-        .header {
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: #4f7cff;
+            border-radius: 12px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 25px;
-        }
-        .judul h2 {
-            margin: 0;
-            font-size: 22px;
-            color: #0066ff;
-        }
-        .user-info p {
-            margin: 0;
-            font-size: 14px;
-        }
-        a.logout {
-            background: linear-gradient(90deg, #ff4b2b, #ff416c);
-            padding: 6px 16px;
+            align-items: center;
+            justify-content: center;
             color: white;
-            border-radius: 20px;
             font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 5px;
+            margin-right: 10px;
+        }
+        .form-control {
+            border-radius: 10px;
+            height: 45px;
+        }
+        .btn-primary {
+            border-radius: 10px;
         }
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background-color: #f0f4ff;
+            font-size: 15px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+<div class="container py-4">
 
-        <div class="header">
-            <div class="judul">
-                <h2>-- POLGAN MART --</h2>
-                <p>Sistem Penjualan Sederhana</p>
-            </div>
-
-            <div class="user-info">
-                <p>Selamat datang, <b><?= htmlspecialchars($_SESSION['username']); ?></b></p>
-                <a href="logout.php" class="logout">Logout</a>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <div class="logo">PM</div>
+            <div>
+                <h5 class="mb-0 fw-bold">--POLGAN MART--</h5>
+                <small>Sistem Penjualan Sederhana</small>
             </div>
         </div>
 
-        <hr>
+        <div class="text-end">
+            <strong>Selamat datang, <?= $_SESSION['username']; ?>!</strong><br>
+            <small>Role: <?= $_SESSION['role']; ?></small><br>
+            <a href="logout.php" class="btn btn-outline-secondary btn-sm mt-2">Logout</a>
+        </div>
+    </div>
 
-        <h3 style="text-align:center; color:#0066ff;">Daftar Pembelian</h3>
-        <p style="text-align:center;">Tanggal Transaksi: <b><?= $tanggal; ?></b></p>
+    <div class="card p-4">
 
-        <table>
-            <tr>
-                <th>Kode Barang</th>
+        <!-- FORM INPUT -->
+        <form method="post">
+            <label class="fw-semibold">Kode Barang</label>
+            <input type="text" class="form-control mb-3" placeholder="Masukkan Kode Barang" name="kode" required>
+
+            <label class="fw-semibold">Nama Barang</label>
+            <input type="text" class="form-control mb-3" placeholder="Masukkan Nama Barang" name="nama" required>
+
+            <label class="fw-semibold">Harga</label>
+            <input type="number" class="form-control mb-3" placeholder="Masukkan Harga" name="harga" required>
+
+            <label class="fw-semibold">Jumlah</label>
+            <input type="number" class="form-control mb-3" placeholder="Masukkan Jumlah" name="jumlah" required>
+
+            <button class="btn btn-primary" name="tambah">Tambahkan</button>
+            <button type="reset" class="btn btn-outline-secondary">Batal</button>
+        </form>
+
+        <hr class="my-4">
+
+        <h5 class="text-center fw-bold mb-3">Daftar Pembelian</h5>
+
+        <!-- TABEL -->
+        <table class="table table-bordered">
+            <tr class="table-light">
+                <th>Kode</th>
                 <th>Nama Barang</th>
                 <th>Harga</th>
                 <th>Jumlah</th>
                 <th>Total</th>
             </tr>
 
-            <?php foreach ($barang_beli as $b): ?>
-            <tr>
-                <td><?= $b["kode"]; ?></td>
-                <td><?= $b["nama"]; ?></td>
-                <td>Rp <?= number_format($b["harga"], 0, ',', '.'); ?></td>
-                <td><?= $b["jumlah"]; ?></td>
-                <td>Rp <?= number_format($b["total"], 0, ',', '.'); ?></td>
-            </tr>
+            <?php if (empty($keranjang)): ?>
+                <tr>
+                    <td colspan="5" class="text-center text-muted">Belum ada barang</td>
+                </tr>
+            <?php endif; ?>
+
+            <?php foreach ($keranjang as $b): ?>
+                <tr>
+                    <td><?= $b["kode"]; ?></td>
+                    <td><?= $b["nama"]; ?></td>
+                    <td>Rp <?= number_format($b["harga"], 0, ',', '.'); ?></td>
+                    <td><?= $b["jumlah"]; ?></td>
+                    <td>Rp <?= number_format($b["total"], 0, ',', '.'); ?></td>
+                </tr>
             <?php endforeach; ?>
 
-            <tfoot>
-                <tr>
-                    <td colspan="4" align="right"><b>Total Belanja</b></td>
-                    <td><b>Rp <?= number_format($grandtotal, 0, ',', '.'); ?></b></td>
-                </tr>
-            </tfoot>
+            <tr>
+                <td colspan="4" class="text-end fw-bold">Total Belanja</td>
+                <td>Rp <?= number_format($totalBelanja, 0, ',', '.'); ?></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-end fw-bold">Diskon</td>
+                <td>Rp <?= number_format($diskon, 0, ',', '.'); ?> (5%)</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="text-end fw-bold">Total Bayar</td>
+                <td class="fw-bold">Rp <?= number_format($totalBayar, 0, ',', '.'); ?></td>
+            </tr>
         </table>
 
+        <form method="post">
+            <button class="btn btn-outline-danger mt-2" name="hapus">Kosongkan Keranjang</button>
+        </form>
+
     </div>
+
+</div>
 </body>
 </html>
